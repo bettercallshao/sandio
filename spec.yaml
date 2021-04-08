@@ -1,0 +1,42 @@
+Version: v1
+Config:
+  Iteration: 0
+  StepSize: 0.01
+BoxType:
+- Type: constant
+  Id: one
+  Input:
+  Output:
+  - Type: float
+    Size: []
+    Id: x
+  Function: output.x = 1
+- Type: persistent
+  Id: integrator
+  Input:
+  - Type: float
+    Size: []
+    Id: x
+  Output:
+  - Type: float
+    Size: []
+    Id: sx
+  Function: output.sx += input.x * config.StepSize
+Box:
+- Type: one
+  Id: one0
+- Type: integrator
+  Id: box0
+  Input:
+  - Id: x
+    Iteration: 0
+    Source: "one0:>x"
+Variable:
+- Type: float
+  Size: []
+  Id: "one0:>x"
+  Value: 0.0
+- Type: float
+  Size: []
+  Id: "box0:>sx"
+  Value: 0.0
