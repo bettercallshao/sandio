@@ -54,7 +54,7 @@ function run(system, cb) {
   // decide whether to run constant box another time
   function needMoreCons() {
     forEachBoxInput(consBox, function (i) {
-      if (i.Iteration != variable(i.Source).Iteration) {
+      if (i.Iteration != variable[i.Source].Iteration) {
         return true;
       }
     });
@@ -110,20 +110,21 @@ function run(system, cb) {
       putOutput(b, output);
     });
   }
+  // get value from variable
+  function getValue() {
+    return applyEachValue(variable, (v) => v.Value);
+  }
 
   // evaluate constant once before loop
   evalCons();
+  cb(0, getValue(), variable);
   // run experiment loop
-  for (let step = 0; step < config.StepCount; step++) {
+  for (let step = 1; step <= config.StepCount; step++) {
     evalPers();
     evalCons();
     // callback after constant evaluation and before persistent
     // to provide most sense making representation of the system
-    cb(
-      step,
-      applyEachValue(variable, (v) => v.Value),
-      variable
-    );
+    cb(step, getValue(), variable);
   }
 }
 
@@ -131,7 +132,7 @@ function run(system, cb) {
 import fs from "fs";
 import YAML from "yaml";
 
-const file = fs.readFileSync("./spec.yaml", "utf8");
+const file = fs.readFileSync(process.argv[2], "utf8");
 const system = YAML.parse(file);
 //console.log(system);
 

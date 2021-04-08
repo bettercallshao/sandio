@@ -1,0 +1,79 @@
+Version: v1
+Config:
+  StepCount: 500
+  StepSize: 0.01
+  Separator: ":"
+BoxType:
+- Type: constant
+  Id: one
+  Output:
+  - Type: float
+    Size: []
+    Id: x
+  Function: output.x = 1
+- Type: constant
+  Id: multiply
+  Input:
+  - Type: float
+    Size: []
+    Id: a
+  - Type: float
+    Size: []
+    Id: b
+  Output:
+  - Type: float
+    Size: []
+    Id: x
+  Function: output.x = input.a * input.b
+- Type: persistent
+  Id: integrator
+  Input:
+  - Type: float
+    Size: []
+    Id: x
+  Output:
+  - Type: float
+    Size: []
+    Id: sx
+  Function: output.sx += input.x * config.StepSize
+Box:
+- Type: one
+  Id: cons0
+- Type: multiply
+  Id: cons1
+  Input:
+  - Id: a
+    Source: "cons0:x"
+  - Id: b
+    Source: "param0"
+- Type: integrator
+  Id: pers0
+  Input:
+  - Id: x
+    Source: "cons1:x"
+- Type: integrator
+  Id: pers1
+  Input:
+  - Id: x
+    Source: "pers0:sx"
+Variable:
+- Type: float
+  Size: []
+  Id: "param0"
+  Value: 4
+- Type: float
+  Size: []
+  Id: "cons0:x"
+  Value: 0.0
+- Type: float
+  Size: []
+  Id: "cons1:x"
+  Value: 0.0
+- Type: float
+  Size: []
+  Id: "pers0:sx"
+  Value: 0.0
+- Type: float
+  Size: []
+  Id: "pers1:sx"
+  Value: 0.0
