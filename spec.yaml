@@ -1,11 +1,10 @@
 Version: v1
 Config:
-  Iteration: 0
+  StepCount: 100
   StepSize: 0.01
 BoxType:
 - Type: constant
   Id: one
-  Input:
   Output:
   - Type: float
     Size: []
