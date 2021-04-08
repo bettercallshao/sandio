@@ -1,7 +1,8 @@
 Version: v1
 Config:
-  StepCount: 500
-  StepSize: 0.01
+  StepCount: 5000
+  StepSize: 0.001
+  Separator: ":"
 BoxType:
 - Type: constant
   Id: one
@@ -28,22 +29,22 @@ Box:
   Id: box0
   Input:
   - Id: x
-    Source: "one0:>x"
+    Source: "one0:x"
 - Type: integrator
   Id: box1
   Input:
   - Id: x
-    Source: "box0:>sx"
+    Source: "box0:sx"
 Variable:
 - Type: float
   Size: []
-  Id: "one0:>x"
+  Id: "one0:x"
   Value: 0.0
 - Type: float
   Size: []
-  Id: "box0:>sx"
+  Id: "box0:sx"
   Value: 0.0
 - Type: float
   Size: []
-  Id: "box1:>sx"
+  Id: "box1:sx"
   Value: 0.0

@@ -1,66 +1,146 @@
-import fs from 'fs'
-import YAML from 'yaml'
-
-function mapify(arr) {
-    return arr.reduce(function(res, item) {
-        res[item.Id] = item;
-        return res;
-    }, {});
+// create map with Id as key
+function mapify(arr, fn) {
+  return arr.reduce(function (res, item) {
+    res[item.Id] = fn ? fn(item) : item;
+    return res;
+  }, {});
+}
+// for each value of object
+function forEachValue(o, fn) {
+  Object.entries(o).forEach(function ([_, v]) {
+    fn(v);
+  });
+}
+// apply each value
+function applyEachValue(o, fn) {
+  const res = {};
+  Object.entries(o).forEach(function ([k, v]) {
+    res[k] = fn(v);
+  });
+  return res;
+}
+// nested loop over inputs of boxes
+function forEachBoxInput(box, fn) {
+  box.forEach(function (b) {
+    b.Input && b.Input.forEach(fn);
+  });
+}
+// do while loop
+function doWhile(body, condition) {
+  body();
+  while (condition()) {
+    body();
+  }
 }
 
-const varSep = ':>';
-const file = fs.readFileSync('./spec.yaml', 'utf8');
+// executes a system object and returns variable states
+function run(system, cb) {
+  const config = system.Config;
+  // put BoxType in a map for lookup
+  const boxType = mapify(system.BoxType);
+  // put Variable in a map for lookup
+  const variable = mapify(system.Variable);
+  // treat constant box from persistent box differently
+  const isConstBox = (b) => boxType[b.Type].Type === "constant";
+  const consBox = system.Box.filter(isConstBox);
+  const persBox = system.Box.filter((b) => !isConstBox(b));
+  // initialize iteration
+  forEachValue(variable, function (v) {
+    v.Iteration = 0;
+  });
+  forEachBoxInput(consBox, function (i) {
+    i.Iteration = 0;
+  });
+  // decide whether to run constant box another time
+  function needMoreCons() {
+    forEachBoxInput(consBox, function (i) {
+      if (i.Iteration != variable(i.Source).Iteration) {
+        return true;
+      }
+    });
+    return false;
+  }
+  // get input map for a box
+  function getInput(b) {
+    const input = {};
+    b.Input &&
+      b.Input.forEach(function (i) {
+        input[i.Id] = variable[i.Source].Value;
+      });
+    return input;
+  }
+  // get box type of box
+  function t(b) {
+    return boxType[b.Type];
+  }
+  // get output map for a box
+  function getOutput(b) {
+    const output = {};
+    t(b).Output.forEach(function (o) {
+      output[o.Id] = variable[b.Id + config.Separator + o.Id].Value;
+    });
+    return output;
+  }
+  // put output map for a box
+  function putOutput(b, output) {
+    t(b).Output.forEach(function (o) {
+      const v = variable[b.Id + config.Separator + o.Id];
+      v.Value = output[o.Id];
+      v.Iteration += 1;
+    });
+  }
+  // evaluate constant box
+  function evalCons() {
+    doWhile(function () {
+      consBox.forEach(function (b) {
+        const input = getInput(b);
+        // constant box cannot use output / state
+        const output = {};
+        eval(t(b).Function);
+        putOutput(b, output);
+      });
+    }, needMoreCons);
+  }
+  // evaluate persistent box
+  function evalPers() {
+    persBox.forEach(function (b) {
+      const input = getInput(b);
+      const output = getOutput(b);
+      eval(t(b).Function);
+      putOutput(b, output);
+    });
+  }
+
+  // evaluate constant once before loop
+  evalCons();
+  // run experiment loop
+  for (let step = 0; step < config.StepCount; step++) {
+    evalPers();
+    evalCons();
+    // callback after constant evaluation and before persistent
+    // to provide most sense making representation of the system
+    cb(
+      step,
+      applyEachValue(variable, (v) => v.Value),
+      variable
+    );
+  }
+}
+
+// main for tests
+import fs from "fs";
+import YAML from "yaml";
+
+const file = fs.readFileSync("./spec.yaml", "utf8");
 const system = YAML.parse(file);
 //console.log(system);
 
-const config = system.Config;
-const boxType = mapify(system.BoxType);
-const variable = mapify(system.Variable);
-const consBox = system.Box.filter(b => boxType[b.Type].Type === 'constant');
-const persBox = system.Box.filter(b => boxType[b.Type].Type === 'persistent');
-
-//console.log(config, boxType, variable, box);
-
-// experiment loop
-for(let i = 0; i < config.StepCount; i++) {
-    // run constants
-    let keep = true;
-    while (keep) {
-        keep = false;
-        consBox.forEach(function (b) {
-            const bt = boxType[b.Type];
-            const input = {};
-            const output = {};
-            (b.Input || []).forEach(function (i) {
-                input[i.Id] = variable[i.Source].Value;
-            });
-            eval(bt.Function);
-            bt.Output.forEach(function (o) {
-                variable[b.Id + varSep + o.Id].Value = output[o.Id];
-            })
-        });
-    }
-
-    // run persistents
-    persBox.forEach(function (b) {
-        const bt = boxType[b.Type];
-        const input = {};
-        const output = {};
-        (b.Input || []).forEach(function (i) {
-            input[i.Id] = variable[i.Source].Value;
-        });
-        bt.Output.forEach(function (o) {
-            output[o.Id] = variable[b.Id + varSep + o.Id].Value;
-        })
-        eval(bt.Function);
-        bt.Output.forEach(function (o) {
-            variable[b.Id + varSep + o.Id].Value = output[o.Id];
-        })
-    });
-
-    console.log(`====`);
-    console.log(`iter ${i}`);
-    Object.entries(variable).forEach(function ([_, v]) {
-        console.log(`${v.Id.padEnd(10)}: ${v.Value}`);
-    })
+function monitor(step, value, variable) {
+  console.log(`====`);
+  console.log(`step ${step}`);
+  forEachValue(variable, function (v) {
+    console.log(`${v.Id.padEnd(10)}: ${v.Value} (${v.Iteration})`);
+  });
 }
+
+run(system, monitor);
