@@ -32,6 +32,10 @@ function doWhile(body, condition) {
     body();
   }
 }
+// is variables same type?
+function isSameType(a, b) {
+  return a.Type === b.Type && a.Size === b.Size;
+}
 
 // executes a system object and returns variable states
 function run(system, cb) {
@@ -40,6 +44,35 @@ function run(system, cb) {
   const boxType = mapify(system.BoxType);
   // put Variable in a map for lookup
   const variable = mapify(system.Variable);
+  // validate
+  system.Box.forEach(function (b) {
+    if (t(b).Input) {
+      const input = mapify(b.Input);
+      t(b).Input.forEach(function (i) {
+        const sid = input[i.Id].Source;
+        const s = variable[sid];
+        if (!s) {
+          throw `Source of box ${b.Id} input ${i.Id} variable ${sid} is missing.`;
+        }
+        if (!isSameType(i, s)) {
+          throw `Type of box ${b.Id} input ${i.Id} mismatches source ${s.Id}.`;
+        }
+      });
+    }
+    if (!t(b).Output) {
+      throw `${b.Type} has no output.`;
+    }
+    t(b).Output.forEach(function (o) {
+      const vid = b.Id + config.Separator + o.Id;
+      const v = variable[vid];
+      if (!v) {
+        throw `Source of box ${b.Id} output ${o.Id} variable ${vid} is missing.`;
+      }
+      if (!isSameType(o, v)) {
+        throw `Type of box ${b.Id} output ${o.Id} mismatches destination ${v.Id}.`;
+      }
+    });
+  });
   // treat constant box from persistent box differently
   const isConstBox = (b) => boxType[b.Type].Type === "constant";
   const consBox = system.Box.filter(isConstBox);
