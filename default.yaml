@@ -21,6 +21,17 @@ BoxType:
   - Id: x
     Type: float
   Function: output.x = input.a * input.b
+- Id: sin
+  Type: constant
+  Input:
+  - Id: period
+    Type: float
+  - Id: shift
+    Type: float
+  Output:
+  - Id: x
+    Type: float
+  Function: output.x = Math.sin((config.Length - input.shift) / input.period * 2 * Math.PI)
 - Id: integrator
   Type: persistent
   Input:
@@ -40,11 +51,18 @@ Box:
     Source: "cons0:x"
   - Id: b
     Source: "param0"
+- Id: cons2
+  Type: sin
+  Input:
+  - Id: period
+    Source: "param1"
+  - Id: shift
+    Source: "param2"
 - Id: pers0
   Type: integrator
   Input:
   - Id: x
-    Source: "cons1:x"
+    Source: "cons2:x"
 - Id: pers1
   Type: integrator
   Input:
@@ -54,10 +72,19 @@ Variable:
 - Id: "param0"
   Type: float
   Value: 4
+- Id: "param1"
+  Type: float
+  Value: 10
+- Id: "param2"
+  Type: float
+  Value: 2.5
 - Id: "cons0:x"
   Type: float
   Value: 0.0
 - Id: "cons1:x"
+  Type: float
+  Value: 0.0
+- Id: "cons2:x"
   Type: float
   Value: 0.0
 - Id: "pers0:sx"
