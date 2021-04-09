@@ -114,17 +114,24 @@ function run(system, cb) {
   function getValue() {
     return applyEachValue(variable, (v) => v.Value);
   }
+  // set step of config
+  function setConfigStep(step) {
+    config.Step = step;
+    config.Length = step * config.StepSize;
+  }
 
   // evaluate constant once before loop
+  setConfigStep(0);
   evalCons();
-  cb(0, getValue(), variable);
+  cb(config, getValue(), variable);
   // run experiment loop
   for (let step = 1; step <= config.StepCount; step++) {
+    setConfigStep(step);
     evalPers();
     evalCons();
     // callback after constant evaluation and before persistent
     // to provide most sense making representation of the system
-    cb(step, getValue(), variable);
+    cb(config, getValue(), variable);
   }
 }
 
@@ -136,9 +143,9 @@ const file = fs.readFileSync(process.argv[2], "utf8");
 const system = YAML.parse(file);
 //console.log(system);
 
-function monitor(step, value, variable) {
+function monitor(config, value, variable) {
   console.log(`====`);
-  console.log(`step ${step}`);
+  console.log(`length    : ${config.Length}`);
   forEachValue(variable, function (v) {
     console.log(`${v.Id.padEnd(10)}: ${v.Value} (${v.Iteration})`);
   });
