@@ -4,76 +4,65 @@ Config:
   StepSize: 0.01
   Separator: ":"
 BoxType:
-- Type: constant
-  Id: one
+- Id: one
+  Type: constant
   Output:
-  - Type: float
-    Size: []
-    Id: x
+  - Id: x
+    Type: float
   Function: output.x = 1
-- Type: constant
-  Id: multiply
+- Id: multiply
+  Type: constant
   Input:
-  - Type: float
-    Size: []
-    Id: a
-  - Type: float
-    Size: []
-    Id: b
+  - Id: a
+    Type: float
+  - Id: b
+    Type: float
   Output:
-  - Type: float
-    Size: []
-    Id: x
+  - Id: x
+    Type: float
   Function: output.x = input.a * input.b
-- Type: persistent
-  Id: integrator
+- Id: integrator
+  Type: persistent
   Input:
-  - Type: float
-    Size: []
-    Id: x
+  - Id: x
+    Type: float
   Output:
-  - Type: float
-    Size: []
-    Id: sx
+  - Id: sx
+    Type: float
   Function: output.sx += input.x * config.StepSize
 Box:
-- Type: one
-  Id: cons0
-- Type: multiply
-  Id: cons1
+- Id: cons0
+  Type: one
+- Id: cons1
+  Type: multiply
   Input:
   - Id: a
     Source: "cons0:x"
   - Id: b
     Source: "param0"
-- Type: integrator
-  Id: pers0
+- Id: pers0
+  Type: integrator
   Input:
   - Id: x
     Source: "cons1:x"
-- Type: integrator
-  Id: pers1
+- Id: pers1
+  Type: integrator
   Input:
   - Id: x
     Source: "pers0:sx"
 Variable:
-- Type: float
-  Size: []
-  Id: "param0"
+- Id: "param0"
+  Type: float
   Value: 4
-- Type: float
-  Size: []
-  Id: "cons0:x"
+- Id: "cons0:x"
+  Type: float
   Value: 0.0
-- Type: float
-  Size: []
-  Id: "cons1:x"
+- Id: "cons1:x"
+  Type: float
   Value: 0.0
-- Type: float
-  Size: []
-  Id: "pers0:sx"
+- Id: "pers0:sx"
+  Type: float
   Value: 0.0
-- Type: float
-  Size: []
-  Id: "pers1:sx"
+- Id: "pers1:sx"
+  Type: float
   Value: 0.0
