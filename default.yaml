@@ -62,7 +62,7 @@ Box:
   Type: integrator
   Input:
   - Id: x
-    Source: "cons2:x"
+    Source: "cons1:x"
 - Id: pers1
   Type: integrator
   Input:

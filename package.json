@@ -5,12 +5,11 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js default.yaml",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node start.js"
   },
   "author": "",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "fs": "^0.0.1-security",
     "yaml": "^1.10.2"
   }

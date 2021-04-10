@@ -168,22 +168,4 @@ function run(system, cb) {
   }
 }
 
-// main for tests
-import fs from "fs";
-import YAML from "yaml";
-
-const file = fs.readFileSync(process.argv[2], "utf8");
-const system = YAML.parse(file);
-//console.log(system);
-
-const stream = fs.createWriteStream("result.csv");
-function monitor(config, value, variable) {
-  console.log(`====`);
-  console.log(`length    : ${config.Length}`);
-  forEachValue(variable, function (v) {
-    console.log(`${v.Id.padEnd(10)}: ${v.Value} (${v.Iteration})`);
-  });
-  stream.write(`${config.Length}, ${value['pers1:sx']}\n`);
-}
-
-run(system, monitor);
+export default {run};
