@@ -1,95 +1,31 @@
 Version: v1
 Config:
-  StepCount: 500
+  StepCount: 2000
   StepSize: 0.01
   Separator: ":"
-BoxType:
-- Id: one
-  Type: constant
-  Output:
-  - Id: x
-    Type: float
-  Function: output.x = 1
-- Id: multiply
-  Type: constant
-  Input:
-  - Id: a
-    Type: float
-  - Id: b
-    Type: float
-  Output:
-  - Id: x
-    Type: float
-  Function: output.x = input.a * input.b
-- Id: sin
-  Type: constant
-  Input:
-  - Id: period
-    Type: float
-  - Id: shift
-    Type: float
-  Output:
-  - Id: x
-    Type: float
-  Function: output.x = Math.sin((config.Length - input.shift) / input.period * 2 * Math.PI)
-- Id: integrator
-  Type: persistent
-  Input:
-  - Id: x
-    Type: float
-  Output:
-  - Id: sx
-    Type: float
-  Function: output.sx += input.x * config.StepSize
 Box:
 - Id: cons0
-  Type: one
-- Id: cons1
-  Type: multiply
-  Input:
-  - Id: a
-    Source: "cons0:x"
-  - Id: b
-    Source: "param0"
-- Id: cons2
   Type: sin
   Input:
   - Id: period
-    Source: "param1"
+    Source: "param0"
   - Id: shift
-    Source: "param2"
+    Source: "param1"
 - Id: pers0
-  Type: integrator
+  Type: integrate
   Input:
   - Id: x
-    Source: "cons1:x"
-- Id: pers1
-  Type: integrator
-  Input:
-  - Id: x
-    Source: "pers0:sx"
+    Source: "cons0:x"
 Variable:
 - Id: "param0"
   Type: float
-  Value: 4
+  Value: 10
 - Id: "param1"
   Type: float
-  Value: 10
-- Id: "param2"
-  Type: float
-  Value: 2.5
+  Value: 2
 - Id: "cons0:x"
   Type: float
   Value: 0.0
-- Id: "cons1:x"
-  Type: float
-  Value: 0.0
-- Id: "cons2:x"
-  Type: float
-  Value: 0.0
 - Id: "pers0:sx"
-  Type: float
-  Value: 0.0
-- Id: "pers1:sx"
   Type: float
   Value: 0.0

@@ -14,7 +14,8 @@ function monitor(config, value, variable) {
   Object.entries(variable).forEach(function ([_, v]) {
     console.log(`${v.Id.padEnd(10)}: ${v.Value} (${v.Iteration})`);
   });
-  stream.write(`${config.Length}, ${value['pers1:sx']}\n`);
+  stream.write(`${config.Length}, ${value["pers0:sx"]}\n`);
 }
 
+//console.log(sandio.builtinBoxType);
 sandio.run(system, monitor);

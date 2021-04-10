@@ -1,6 +1,8 @@
+import builtinBoxType from "./builtinBoxType.js";
+
 // create map with Id as key
 function mapify(arr, fn) {
-  return arr.reduce(function (res, item) {
+  return (arr || []).reduce(function (res, item) {
     res[item.Id] = fn ? fn(item) : item;
     return res;
   }, {});
@@ -40,12 +42,15 @@ function isSameType(a, b) {
 // executes a system object and returns variable states
 function run(system, cb) {
   const config = system.Config;
-  // put BoxType in a map for lookup
-  const boxType = mapify(system.BoxType);
+  // put BoxType in a map for lookup with builtin box type
+  const boxType = {...mapify(system.BoxType), ...mapify(builtinBoxType)};
   // put Variable in a map for lookup
   const variable = mapify(system.Variable);
   // validate
   system.Box.forEach(function (b) {
+    if (!t(b)) {
+      throw `Type of box ${b.Id} type ${b.Type} is missing.`;
+    }
     if (t(b).Input) {
       const input = mapify(b.Input);
       t(b).Input.forEach(function (i) {
@@ -168,4 +173,4 @@ function run(system, cb) {
   }
 }
 
-export default {run};
+export default { run, builtinBoxType };
