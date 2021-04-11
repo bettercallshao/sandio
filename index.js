@@ -43,7 +43,7 @@ function isSameType(a, b) {
 function run(system, cb) {
   const config = system.Config;
   // put BoxType in a map for lookup with builtin box type
-  const boxType = {...mapify(system.BoxType), ...mapify(builtinBoxType)};
+  const boxType = { ...mapify(system.BoxType), ...mapify(builtinBoxType) };
   // put Variable in a map for lookup
   const variable = mapify(system.Variable);
   // validate
@@ -161,7 +161,7 @@ function run(system, cb) {
   // evaluate constant once before loop
   setConfigStep(0);
   evalCons();
-  cb(config, getValue(), variable);
+  cb({ ...config }, getValue(), { ...variable });
   // run experiment loop
   for (let step = 1; step <= config.StepCount; step++) {
     setConfigStep(step);
@@ -169,7 +169,7 @@ function run(system, cb) {
     evalCons();
     // callback after constant evaluation and before persistent
     // to provide most sense making representation of the system
-    cb(config, getValue(), variable);
+    cb({ ...config }, getValue(), { ...variable });
   }
 }
 
