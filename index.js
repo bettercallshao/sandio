@@ -41,7 +41,7 @@ function isSameType(a, b) {
 
 // executes a system object and returns variable states
 function run(system, cb) {
-  const config = system.Config;
+  const config = { ...system.Config };
   // put BoxType in a map for lookup with builtin box type
   const boxType = { ...mapify(system.BoxType), ...mapify(builtinBoxType) };
   // put Variable in a map for lookup
