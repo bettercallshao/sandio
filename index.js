@@ -47,6 +47,9 @@ function run(system, cb) {
   // put Variable in a map for lookup
   const variable = mapify(system.Variable);
   // validate
+  if (!system.Config) {
+    throw `Config field is missing.`;
+  }
   if (!system.Box) {
     throw `Box field is missing.`;
   }
