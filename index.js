@@ -47,6 +47,9 @@ function run(system, cb) {
   // put Variable in a map for lookup
   const variable = mapify(system.Variable);
   // validate
+  if (!system.Box) {
+    throw `Box field is missing.`;
+  }
   system.Box.forEach(function (b) {
     if (!t(b)) {
       throw `Type of box ${b.Id} type ${b.Type} is missing.`;
